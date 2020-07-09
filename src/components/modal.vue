@@ -1,11 +1,11 @@
 <template>
-  <modal name="modal" :classes="modal" @before-open="beforeOpen" @before-close="beforeClose">
+  <modal name="modal" @before-open="beforeOpen" @before-close="beforeClose">
     <span class="ask">
       Do you want
-      <span>{{(!togle)? 'delete Note and exit':'exit from Edit'}}</span>?
+      <span>{{(!data.cancelBtn)? 'delete Note':'exit from Edit'}}</span>?
     </span>
     <button type="button" @click="agree">Yes</button>
-    <button type="button" @click="disegree">No</button>
+    <button type="button" id="disegree" @click="disegree">No</button>
   </modal>
 </template>
 
@@ -15,18 +15,22 @@ export default {
   data() {
     return {
       time: 0,
-      duration: 5000,
-      data: {},
+      duration: 4000,
+      data: {
+        agree: Boolean,
+        cancelBtn: false
+      },
       togle: Boolean
     };
   },
+
   methods: {
     beforeOpen(event) {
-      this.data.id = event.params.delNote;
-      if (this.data.id === undefined) {
-        this.togle = true;
+      this.data.id = event.params.note.id;
+      if (event.params.note.target !== undefined) {
+        this.data.cancelBtn = true;
       } else {
-        this.togle = false;
+        this.data.cancelBtn = false;
       }
       // Set the opening time of the modal
       this.time = Date.now();

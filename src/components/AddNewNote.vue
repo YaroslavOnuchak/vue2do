@@ -1,27 +1,40 @@
 <template>
   <form @submit.prevent="onSubmit">
-    <input v-model="title" type="text" placeholder="add new Note" />
-    <button type="submit" @click="onSubmit">create</button>
+    <input type="text" placeholder="add new Note" v-model="note.title" />
+    <button type="submit" @click="reset(event)">create</button>
+    <hr />
   </form>
 </template>
 
 <script>
+import { db } from "../firebaseDb";
+
 export default {
   data() {
     return {
-      title: ""
+      title: "",
+      note: {
+        title: "",
+        todos: [
+          {
+            title: "edit todo",
+            completed: false,
+            edit: false
+          }
+        ]
+      }
     };
   },
   methods: {
-    onSubmit() {
-      if (this.title.trim()) {
-        const newNote = {
-          title: this.title,
-          todos: []
-        };
-        this.$emit("add-Note", newNote);
-      }
-      this.title = "";
+    onSubmit(event) {
+      db.collection("notes")
+        .add(this.note)
+        .then(() => {
+        })
+        .catch(error => {
+          console.log(error);
+        });
+      event.preventDefault(), event.target.reset();
     }
   }
 };

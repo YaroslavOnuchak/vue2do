@@ -12,6 +12,7 @@
     "firebase": "^7.15.5",
     "vue": "^2.6.11",
     "vue-js-modal": "^2.0.0-rc.3",
+    "vue-resource": "^1.5.1",
     "vue-router": "^3.3.4",
     "vuefire": "^2.2.0-alpha.0"
   },

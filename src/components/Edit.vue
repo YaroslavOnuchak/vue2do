@@ -9,8 +9,8 @@
       <div class="wrap_note_btn">
         <button type="button" @click="addTodo">add todo</button>
         <button type="button" @click="save(note)">save</button>
-        <button type="button" @click="show()">cancel edit</button>
-        <button type="button" @click="show(note.id)">del note</button>
+        <button type="button" id="cancel" @click="show">cancel edit</button>
+        <button type="button" id="delE" @click="show(note)">del note</button>
         <button type="button" @click="removeEdit">remove edit</button>
         <button type="button" @click="repeadEdit">repead edit</button>
       </div>
@@ -34,27 +34,31 @@
 </template>
 
 <script>
-import modal from "@//components/modal";
+import { db } from "../firebaseDb";
+import modal from "@/components/modal";
 export default {
   props: {
     note: Object,
     required: true
   },
   components: { modal },
+
   mounted() {
-    if (
-      localStorage.getItem("note") === undefined ||
-      localStorage.getItem("note") === null
-    ) {
-      localStorage.setItem("note", JSON.stringify(this.note));
-    } else {
-      this.note = JSON.parse(localStorage.getItem("note"));
-    }
+    // if (
+    //   localStorage.getItem("note") === undefined ||
+    //   localStorage.getItem("note") === null
+    // ) {
+    localStorage.setItem("note", JSON.stringify(this.note));
+    // } else {
+    //   this.note = JSON.parse(localStorage.getItem("note"));
+    // }
+    // console.log("local", this.note.key);
+    console.log("local", this.note);
   },
   methods: {
     addTodo() {
       this.note.todos.push({
-        title: `enter todo`,
+        title: `edit todo`,
         completed: false,
         edit: false
       });
@@ -63,9 +67,18 @@ export default {
       this.note.todos.splice(el, 1);
     },
     delNote(id) {
-      fetch(`http://localhost:3000/notes/${id}`, {
-        method: "DELETE"
-      });
+      db.collection("notes")
+        .doc(id)
+        .delete()
+        .then(() => {
+          console.log("Document deleted!");
+        })
+        .catch(error => {
+          console.error(error);
+        });
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      this.$router.push("/");
     },
     editTodo(el) {
       if (el.edit == false) {
@@ -84,7 +97,8 @@ export default {
     cancelEdit() {
       this.note.edit = true;
       this.$router.push("/");
-      localStorage.clear();
+      window.localStorage.clear();
+      window.sessionStorage.clear();
     },
     save(note) {
       note.todos.forEach(el => {
@@ -93,22 +107,29 @@ export default {
           el.edit = false;
         }
       });
-      fetch(`http://localhost:3000/notes/${note.id}`, {
-        method: "PUT",
-        body: JSON.stringify(note),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
-      });
+      db.collection("notes")
+        .doc(this.note.key)
+        .update(this.note)
+        .then(() => {
+          // this.$router.push("/");
+        })
+        .catch(error => {
+          console.log(error);
+        });
+      // localStorage.clear();
     },
-    show(id) {
-      this.$modal.show("modal", { delNote: id });
+    show(note) {
+      this.$modal.show("modal", { note: note });
     },
     hide(el) {
       this.$modal.hide("modal");
       if (el.agree) {
-        this.delNote(el.id);
-        this.$router.push("/");
+        if (!el.cancelBtn) {
+          this.delNote(el.id);
+        } else {
+          this.$router.push("/");
+        }
+      } else {
       }
     }
   }

@@ -1,11 +1,11 @@
 <template>
   <div>
-    <AddNote @add-Note="addNote" />
+    <AddNote />
     <modal @agree="hide" @disegree="hide" />
-    <ul>
-      <li class="note" v-for="note of notes" :key="note">
+    <ul v-if="notes.length">
+      <li class="note" v-for="note of notes" :key="note.title">
         <div class="wrap_btn">
-          <button type="button" @click="show(note.id)">del</button>
+          <button type="button" @click="show(note)">del</button>
           <button type="button">
             <router-link :to="{ name: 'edit', params: { note: note }}">edit</router-link>
           </button>
@@ -19,12 +19,15 @@
         </ul>
       </li>
     </ul>
+
+    <span v-else>No NOTES, create one</span>
   </div>
 </template>
 
 <script>
-import AddNote from "@//components/AddNewNote";
-import modal from "@//components/modal";
+import { db } from "../firebaseDb";
+import modal from "@/components/modal";
+import AddNote from "@/components/AddNewNote";
 export default {
   name: "App",
   data() {
@@ -41,46 +44,39 @@ export default {
       }
     }
   },
-  mounted() {
-    this.getNote();
+  created() {
+    db.collection("notes").onSnapshot(snapshotChange => {
+      this.notes = [];
+      snapshotChange.forEach(doc => {
+        this.notes.push({
+          key: doc.id,
+          title: doc.data().title,
+          todos: doc.data().todos,
+          id: doc.id
+        });
+      });
+    });
   },
+  mounted() {},
   components: {
-    AddNote,
-    modal
+    modal,
+    AddNote
   },
   methods: {
-    delNote(note) {
-      fetch(`http://localhost:3000/notes/${note}`, {
-        method: "DELETE"
-      }).then(response => {
-        if (response.status === 200) {
-          this.getNote();
-        }
-      });
-    },
-    getNote() {
-      fetch("http://localhost:3000/notes")
-        .then(response => response.json())
-        .then(json => (this.notes = json));
-    },
-    addNote(newNote) {
-      fetch("http://localhost:3000/notes", {
-        method: "POST",
-        body: JSON.stringify(newNote),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
-      })
-        .then(response => {
-          response.json();
+    delNote(id) {
+      db.collection("notes")
+        .doc(id)
+        .delete()
+        .then(() => {
+          console.log("Document deleted!");
         })
-        .then(json => {
-          this.notes = json;
-          this.getNote();
+        .catch(error => {
+          console.error(error);
         });
+      this.$modal.hide("modal");
     },
-    show(id) {
-      this.$modal.show("modal", { delNote: id });
+    show(note) {
+      this.$modal.show("modal", { note: note });
     },
     hide(el) {
       this.$modal.hide("modal");
@@ -98,5 +94,11 @@ li {
 }
 li span {
   margin-left: 0.5rem;
+}
+.listTodo {
+  height: 5rem;
+  overflow: hidden;
+  box-shadow: 0 0 5rem inset lightcyan;
+  border-radius: 20%;
 }
 </style>

@@ -73,7 +73,6 @@ li.note {
   margin: 1rem auto;
   max-width: 100%;
   box-shadow: 0 0 1rem lightblue;
-
   width: 60%;
 }
 .wrap_btn {
