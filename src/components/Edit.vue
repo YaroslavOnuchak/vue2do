@@ -44,16 +44,7 @@ export default {
   components: { modal },
 
   mounted() {
-    // if (
-    //   localStorage.getItem("note") === undefined ||
-    //   localStorage.getItem("note") === null
-    // ) {
     localStorage.setItem("note", JSON.stringify(this.note));
-    // } else {
-    //   this.note = JSON.parse(localStorage.getItem("note"));
-    // }
-    // console.log("local", this.note.key);
-    console.log("local", this.note);
   },
   methods: {
     addTodo() {
