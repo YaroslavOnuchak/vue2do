@@ -7,14 +7,18 @@
         <div class="wrap_btn">
           <button type="button" @click="show(note)">del</button>
           <button type="button">
-            <router-link :to="{ name: 'edit', params: { note: note }}">edit</router-link>
+            <router-link :to="{ name: 'edit', params: { note: note } }"
+              >edit</router-link
+            >
           </button>
         </div>
-        <strong>{{note.title}}</strong>
+        <strong>{{ note.title }}</strong>
         <ul class="listTodo">
           <li v-for="todo of note.todos" :key="todo">
             <input type="checkbox" v-bind:checked="todo.completed" disabled />
-            <span v-bind:class="{done: todo.completed}">{{todo.title}}</span>
+            <span v-bind:class="{ done: todo.completed }">{{
+              todo.title
+            }}</span>
           </li>
         </ul>
       </li>
@@ -32,7 +36,7 @@ export default {
   name: "App",
   data() {
     return {
-      notes: []
+      notes: [],
     };
   },
 
@@ -41,18 +45,18 @@ export default {
       type: Object,
       default() {
         return {};
-      }
-    }
+      },
+    },
   },
   created() {
-    db.collection("notes").onSnapshot(snapshotChange => {
+    db.collection("notes").onSnapshot((snapshotChange) => {
       this.notes = [];
-      snapshotChange.forEach(doc => {
+      snapshotChange.forEach((doc) => {
         this.notes.push({
           key: doc.id,
           title: doc.data().title,
           todos: doc.data().todos,
-          id: doc.id
+          id: doc.id,
         });
       });
     });
@@ -60,7 +64,7 @@ export default {
   mounted() {},
   components: {
     modal,
-    AddNote
+    AddNote,
   },
   methods: {
     delNote(id) {
@@ -70,7 +74,7 @@ export default {
         .then(() => {
           console.log("Document deleted!");
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
         });
       this.$modal.hide("modal");
@@ -83,8 +87,8 @@ export default {
       if (el.agree) {
         this.delNote(el.id);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -99,6 +103,6 @@ li span {
   height: 5rem;
   overflow: hidden;
   box-shadow: 0 0 5rem inset lightcyan;
-  border-radius: 20%;
+  border-radius: 1rem;
 }
 </style>
